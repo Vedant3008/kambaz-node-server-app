@@ -12,7 +12,7 @@ export default function QueryParameters(app) {
      case "Multiply":
        result = parseInt(a) * parseInt(b);
        break;
-     case "Multiply":
+     case "Divide":
        result = parseInt(a) / parseInt(b);
        break;
      default:
