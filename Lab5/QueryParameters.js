@@ -1,24 +1,24 @@
 export default function QueryParameters(app) {
- const calculator = (req, res) => {
-   const { a, b, operation } = req.query;
-   let result = 0;
-   switch (operation) {
-     case "add":
-       result = parseInt(a) + parseInt(b);
-       break;
-     case "subtract":
-       result = parseInt(a) - parseInt(b);
-       break;
-     case "Multiply":
-       result = parseInt(a) * parseInt(b);
-       break;
-     case "Divide":
-       result = parseInt(a) / parseInt(b);
-       break;
-     default:
-       result = "Invalid operation";
-   }
-   res.send(result.toString());
- };
- app.get("/lab5/calculator", calculator);
+  const calculator = (req, res) => {
+    const { a, b, operation } = req.query;
+    let result = 0;
+    switch (operation) {
+      case "add":
+        result = parseInt(a) + parseInt(b);
+        break;
+      case "subtract":
+        result = parseInt(a) - parseInt(b);
+        break;
+      case "multiply":  // Make sure this is lowercase
+        result = parseInt(a) * parseInt(b);
+        break;
+      case "divide":    // Make sure this is lowercase
+        result = parseInt(a) / parseInt(b);
+        break;
+      default:
+        result = "Invalid operation";
+    }
+    res.send(result.toString());
+  };
+  app.get("/lab5/calculator", calculator);
 }
