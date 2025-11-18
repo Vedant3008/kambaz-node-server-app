@@ -1,0 +1,41 @@
+{
+  "name": "kambaz-node-server-app",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [
+    "Node",
+    "REST",
+    "Server",
+    "HTTP",
+    "Web",
+    "Development",
+    "CS5610",
+    "CS4550"
+  ],
+  "homepage": "https://github.com/Vedant3008/kambaz-node-server-app#readme",
+  "bugs": {
+    "url": "https://github.com/Vedant3008/kambaz-node-server-app/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Vedant3008/kambaz-node-server-app.git"
+  },
+  "license": "ISC",
+  "author": "Vedant Shah",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "node Hello.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "react-bootstrap": "^2.10.10",
+    "react-icons": "^5.5.0",
+    "uuid": "^13.0.0"
+  }
+}
