@@ -6,9 +6,11 @@ import db from "./Kambaz/Database/index.js";
 import UserRoutes from "./Kambaz/Users/routes.js";
 import Lab5 from "./Lab5/index.js";
 import Hello from "./Hello.js";
+import session from "express-session";
 import CourseRoutes from "./Kambaz/Courses/routes.js";
 import ModulesRoutes from "./Kambaz/Modules/routes.js";
 import AssignmentsRoutes from "./Kambaz/Assignments/routes.js";
+import EnrollmentRoutes from "./Kambaz/Enrollments/routes.js";
 
 const app = express();
 app.use(
@@ -40,6 +42,7 @@ UserRoutes(app, db);
 CourseRoutes(app, db);
 ModulesRoutes(app, db);
 AssignmentsRoutes(app, db);
+EnrollmentRoutes(app, db);
 Lab5(app);
 Hello(app);
 app.listen(process.env.PORT || 4000, () => console.log('Server running on port 4000'));
