@@ -1,50 +1,28 @@
+import model from "./model.js";
 import { v4 as uuidv4 } from "uuid";
 
-export default function EnrollmentsDao(db) {
-  function enrollUserInCourse(userId, courseId) {
-    const { enrollments } = db;
-    const existing = enrollments.find(
-      e => e.user === userId && e.course === courseId
-    );
-    if (existing) return existing;
-    
-    const newEnrollment = {
-      _id: uuidv4(),
-      user: userId,
-      course: courseId
-    };
-    enrollments.push(newEnrollment);
-    return newEnrollment;
-  }
-
-  function unenrollUserFromCourse(userId, courseId) {
-    const { enrollments } = db;
-    const index = enrollments.findIndex(
-      e => e.user === userId && e.course === courseId
-    );
-    if (index !== -1) {
-      enrollments.splice(index, 1);
-      return true;
-    }
-    return false;
-  }
-
-  function isUserEnrolled(userId, courseId) {
-    const { enrollments } = db;
-    return enrollments.some(
-      e => e.user === userId && e.course === courseId
-    );
-  }
-
-  function findEnrollmentsForUser(userId) {
-    const { enrollments } = db;
-    return enrollments.filter(e => e.user === userId);
-  }
-
-  return { 
-    enrollUserInCourse, 
-    unenrollUserFromCourse, 
-    isUserEnrolled,
-    findEnrollmentsForUser
+export const enrollUserInCourse = async (userId, courseId) => {
+  const existing = await model.findOne({ user: userId, course: courseId });
+  if (existing) return existing;
+  
+  const newEnrollment = {
+    _id: uuidv4(),
+    user: userId,
+    course: courseId
   };
-}
+  return await model.create(newEnrollment);
+};
+
+export const unenrollUserFromCourse = async (userId, courseId) => {
+  const result = await model.deleteOne({ user: userId, course: courseId });
+  return result.deletedCount > 0;
+};
+
+export const isUserEnrolled = async (userId, courseId) => {
+  const enrollment = await model.findOne({ user: userId, course: courseId });
+  return !!enrollment;
+};
+
+export const findEnrollmentsForUser = async (userId) => {
+  return await model.find({ user: userId });
+};

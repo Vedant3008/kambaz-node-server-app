@@ -1,52 +1,88 @@
-import CoursesDao from "./dao.js";
-import EnrollmentsDao from "../Enrollments/dao.js";
+import * as dao from "./dao.js";
 
-export default function CourseRoutes(app, db) {
-  const dao = CoursesDao(db);
-  const enrollmentsDao = EnrollmentsDao(db);
+export default function CourseRoutes(app) {  
+  
+  app.get("/api/courses", async (req, res) => {
+    try {
+      const courses = await dao.findAllCourses();
+      res.json(courses);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 
-  const findAllCourses = (req, res) => {
-    const courses = dao.findAllCourses();
-    res.send(courses);
-  };
-
-  const findCoursesForEnrolledUser = (req, res) => {
-    let { userId } = req.params;
-    if (userId === "current") {
+  app.get("/api/users/current/courses", async (req, res) => {
+    try {
       const currentUser = req.session["currentUser"];
       if (!currentUser) {
-        res.sendStatus(401);
-        return;
+        return res.status(401).json({ error: "Not logged in" });
       }
-      userId = currentUser._id;
+      
+      if (currentUser.role === "FACULTY" || currentUser.role === "ADMIN") {
+        const courses = await dao.findAllCourses();
+        return res.json(courses);
+      }
+      
+      const courses = await dao.findCoursesForEnrolledUser(currentUser._id);
+      res.json(courses);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
-    const courses = dao.findCoursesForEnrolledUser(userId);
-    res.json(courses);
-  };
+  });
 
-  const createCourse = (req, res) => {
-    const currentUser = req.session["currentUser"];
-    const newCourse = dao.createCourse(req.body);
-    enrollmentsDao.enrollUserInCourse(currentUser._id, newCourse._id);
-    res.json(newCourse);
-  };
+  app.get("/api/users/:userId/courses", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const courses = await dao.findCoursesForEnrolledUser(userId);
+      res.json(courses);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 
-  const deleteCourse = (req, res) => {
-    const { courseId } = req.params;
-    const status = dao.deleteCourse(courseId);
-    res.send(status);
-  };
+  app.post("/api/courses", async (req, res) => {
+    try {
+      const course = await dao.createCourse(req.body);
+      res.json(course);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 
-  const updateCourse = (req, res) => {
-    const { courseId } = req.params;
-    const courseUpdates = req.body;
-    const status = dao.updateCourse(courseId, courseUpdates);
-    res.send(status);
-  };
+  app.delete("/api/courses/:courseId", async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      await dao.deleteCourse(courseId);
+      res.sendStatus(200);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 
-  app.get("/api/courses", findAllCourses);
-  app.get("/api/users/:userId/courses", findCoursesForEnrolledUser);
-  app.post("/api/users/current/courses", createCourse);
-  app.delete("/api/courses/:courseId", deleteCourse);
-  app.put("/api/courses/:courseId", updateCourse);
+  app.put("/api/courses/:courseId", async (req, res) => {
+    try {
+      const { courseId } = req.params;
+      const course = await dao.updateCourse(courseId, req.body);
+      res.json(course);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
+
+  app.post("/api/users/current/courses", async (req, res) => {
+    try {
+      const currentUser = req.session["currentUser"];
+      if (!currentUser || currentUser.role !== "FACULTY") {
+        return res.status(403).json({ error: "Only faculty can create courses" });
+      }
+      
+      const course = await dao.createCourse(req.body);
+      
+      await enrollmentDao.enrollUserInCourse(currentUser._id, course._id);
+      
+      res.json(course);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  });
 }

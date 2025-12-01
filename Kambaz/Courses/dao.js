@@ -1,42 +1,28 @@
+import model from "./model.js";
+import enrollmentModel from "../Enrollments/model.js";  // We'll create this next
 import { v4 as uuidv4 } from "uuid";
 
-export default function CoursesDao(db) {
-  function findAllCourses() {
-    return db.courses;
-  }
+export const findAllCourses = async () => {
+  return await model.find();
+};
 
-  function findCoursesForEnrolledUser(userId) {
-    const { courses, enrollments } = db;
-    const enrolledCourses = courses.filter((course) =>
-      enrollments.some((enrollment) => enrollment.user === userId && enrollment.course === course._id)
-    );
-    return enrolledCourses;
-  }
+export const findCoursesForEnrolledUser = async (userId) => {
+  const enrollments = await enrollmentModel.find({ user: userId });
+  const courseIds = enrollments.map(e => e.course);
+  return await model.find({ _id: { $in: courseIds } });
+};
 
-  function createCourse(course) {
-    const newCourse = { ...course, _id: uuidv4() };
-    db.courses = [...db.courses, newCourse];
-    return newCourse;
-  }
+export const createCourse = async (course) => {
+  const newCourse = { ...course, _id: uuidv4() };
+  return await model.create(newCourse);
+};
 
-  function deleteCourse(courseId) {
-    const { courses, enrollments } = db;
-    db.courses = courses.filter((course) => course._id !== courseId);
-    db.enrollments = enrollments.filter((enrollment) => enrollment.course !== courseId);
-  }
+export const deleteCourse = async (courseId) => {
+  await model.deleteOne({ _id: courseId });
+  await enrollmentModel.deleteMany({ course: courseId });
+};
 
-  function updateCourse(courseId, courseUpdates) {
-    const { courses } = db;
-    const course = courses.find((course) => course._id === courseId);
-    Object.assign(course, courseUpdates);
-    return course;
-  }
-
-  return { 
-    findAllCourses, 
-    findCoursesForEnrolledUser, 
-    createCourse, 
-    deleteCourse, 
-    updateCourse 
-  };
-}
+export const updateCourse = async (courseId, courseUpdates) => {
+  await model.updateOne({ _id: courseId }, { $set: courseUpdates });
+  return await model.findById(courseId);
+};
