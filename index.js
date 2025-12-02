@@ -29,10 +29,16 @@ const sessionOptions = {
   secret: process.env.SESSION_SECRET || "kambaz-secret",
   resave: false,
   saveUninitialized: false,
+  cookie: {
+    sameSite: process.env.SERVER_ENV === "production" ? "none" : "lax",
+    secure: process.env.SERVER_ENV === "production",
+    httpOnly: true,
+    maxAge: 1000 * 60 * 60 * 24 // 24 hours
+  }
 };
 
 if (process.env.SERVER_ENV === "production") {
-  app.set("trust proxy", 1); // Trust Render's proxy
+  app.set("trust proxy", 1);
 }
 
 app.use(session(sessionOptions));
